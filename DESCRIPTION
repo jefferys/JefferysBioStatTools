@@ -1,0 +1,16 @@
+Package: JefferysBioStatTools
+Type: Package
+Title: Biostatistic tools organized for easy use
+Version: 0.0.0.9000
+Author: Stuart R. Jefferys <srj@unc.edu>
+Maintainer: Stuart R. Jefferys <srj@unc.edu>
+Description: Statistical tools are scattered all over the place in R. I want
+  one place to find them. I also want *my* documentation for them to go somewhere
+  directly accessible, not hidden in text files. I expect most things here will
+  be wrappers around existing functions. It does add overhead to
+  pass big data, have to be careful about that.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Suggests: testthat
