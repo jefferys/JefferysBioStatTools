@@ -1,7 +1,7 @@
 Package: JefferysBioStatTools
 Type: Package
 Title: Biostatistic tools organized for easy use
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Author: Stuart R. Jefferys <srj@unc.edu>
 Maintainer: Stuart R. Jefferys <srj@unc.edu>
 Description: Statistical tools are scattered all over the place in R. I want
