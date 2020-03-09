@@ -1,0 +1,142 @@
+---
+title: "Binomial models"
+author: "Stuart R. Jefferys"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Binomial models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## An example: coin flipping
+
+Flipping a coin has two possible outcomes, head or tail. It might land on its edge, but that is so unlikely we won't consider that. Our expectation is that both outcomes are equally likely, with a 50% chance of each. Given this system we want to answer some questions:
+
+* If I flip the coin 10 times, how many heads and how many tails do I expect?
+* If I flip the coin 10 times, what is the probability that I get 10 heads? 7 or more heads? Between 4 and 6 heads?
+* If I flip the coin 10 times and get 7 heads, what is the probability that the coin is unfair, i.e. that it does not really give heads and tails with equal likelihood.
+
+## Binomial probability model
+
+An experiment can be represented using a **binomial probability model** if:
+
+* The experiment consists of $n$ identical trials, with $n$ not to big. [SRJ:: how big and why?]
+* Each trial results in one of the two outcomes, arbitrarily called "success" and "failure".
+* The probability of "success", denoted $p$, remains the same from trial to trial.
+* The $n$ trials are independent, meaning the outcome of any trial does not affect the outcome of the others.
+
+### Binomial probability mass function (density)
+
+Mathematically the probability of different outcomes in this system can be represented by the following function. This probability mass function gives the probability $f$ of getting $x$ "success" outcomes if $n$ trials are attempted where the probability of success on any trial is $p$:
+
+$$f(x,n,p) = \left(\frac{n!}{x!(n-x)!}\right) p^x (1-p)^{(n-x)} = \binom{n}{x}p^x (1-p)^{(n-x)}$$
+
+#### Calculating
+
+It is difficult to compute the probabilities using the factorials directly as this takes a long time if n gets large. Various approximations are used behind the scenes for large n. There are direct statistical approximations that can be made using different distributions if n is large.
+
+[SRJ:: what are these]
+
+##### Using R
+
+Using R, the functions associated with a binomial model are `*binom`, where `*` follows the standard naming conventions for [R probability models](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Distributions.html). For the probability mass function, `*` is `d` for density. Even though this is discrete, it is `d` for density, not `m` for mass as would be more correct but less uniform. The function is:
+
+`dbinom( x= x, size= n, prob= p )`
+
+In normal R fashion, `x` can be a vector of values. Although the parameter names can be left out when the order is preserved, I can never remember that `size` comes before `prob`, so I use the parameter names for everything but the main data input parameter `x`.
+
+```{r "Ex. Binomial probability mass function", results= "hold", fig.align= "center"}
+p <- 0.5
+n <- 10
+x <- 0:10
+resultProbability <- dbinom( x, size= n, prob= p )
+knitr::kable( data.frame(successes=x, probability=resultProbability) )
+barplot( resultProbability, xlab= "number of successes", ylab= "probability",
+         main= "Binomial probability\nn = 10\np = 0.5" )
+```
+
+##### Small probabilities
+
+Because many of the probabilities reported by a binomial will be small, a logarithmic plot can help to keep results on scale. The `dbinom` function takes a `log=` parameter that can be set `TRUE` to report the $log_e$ of the probabilities.
+
+```{r "Ex. Binomial probability mass function with very small results (log)", results= "hold", fig.align="center"}
+logResultProbability <- dbinom( x, size= n, prob= p, log= TRUE)
+knitr::kable( data.frame( successes= x, probability= resultProbability,
+                          logProbability= logResultProbability ))
+
+barplot( logResultProbability, xlab= "number of successes",
+         ylab= "log of probability",
+         main= "Log of binomial probability\nn = 10\np = 0.5" )
+```
+
+#### Maximum and minimum probability
+
+The minimum of the probability mass density function occurs at either $x = n$ when $p > 0.5$, at $x = 0$ when $p < 0.5$, and is symmetric with both $x = 0$ and $x = n$ having the same probability when $p = 0.5$.
+
+The maximum of the probability mass density function occurs at the integer $M$ where $(n+1)p - 1 ≤ M < (n +1)p$, unless $(n+1)p$ is itself an integer, in which case two successive M have the same maximum probability, $(n+1)p$ and $(n+1)p - 1$.
+
+### Binomial cumulative distribution function
+
+The cumulative distribution function for the binomial gives the probability of getting $x$ or less successes in $n$ trials, if the probability of a success on a trial is $p$. It is easy to write down but hard to calculate. It is the sum of the probabilities of getting each possible number of success from $0$ to $x$. Each of these probabilities is given by the binomial mass function for that value of $x$.
+
+$$F(x,n,p) = \sum_{i=0}^{x}f(i,n,p) = \sum_{i=0}^{x}\left(\frac{n!}{i!(n-i)!}\right) p^i (1-p)^{(n-i)} = \sum_{i=0}^{x}\binom{n}{i}p^i (1-p)^{(n-i)}$$
+
+#### Calculating
+
+This is harder to calculate directly than the probability mass function. Again various approximations are used behind the scenes.
+
+[SRJ:: what are these. Can different approximate models be used here too?]
+
+##### Using R
+
+For the probability mass function, `*` is `p`. The function is:
+
+`pbinom( x= x, size= n, prob= p )`
+
+`x` can be a vector of values.
+
+```{r "Ex. Binomial cumulative distribution function", results= "hold", fig.align= "center"}
+p <- 0.5
+n <- 10
+x <- 0:10
+resultCumulativeProbability <- pbinom( x, size= n, prob= p )
+knitr::kable( data.frame(successes=x, probability=resultCumulativeProbability) )
+barplot( resultCumulativeProbability, xlab= "number of successes", ylab= "cumulative probability",
+         main= "Binomial cumulative probability\nn = 10\np = 0.5" )
+```
+
+There is another parameter, `lower.tail=`, that has little use. It simply returns the probability of getting a number of successes greater than x instead of less than or equal to x when set to TRUE. That is just 1 - pbinom().
+
+##### With small probabilities
+
+Like with the probability mass function, logarithms can be used to compress the scale when comparing different probabilities. The `pbinom()` function also has a `log=` parameter. the same as the `dbinom()`
+
+### Statistical parameters
+
+#### Measures of central tendency:
+
+* **mean**: $np$
+
+### [SRJ::TODO extra text. use or delete]
+
+Some experiment involving a defined system can have two outcomes: left/right, true/false, black/white, head/tail, 1/0, etc. To make things simple we *arbitrarily* choose one outcome, and call it "success". This label is nothing other than a handle on one of the outcomes. Calling it "A", or "true", or "Alice" would be just as good. Different independent runs of this experiment each yield the "success" outcome with what seems to be a constant probability, $p$.
+
+Some questions we might ask are:
+* What is the probability of getting the other outcome, which we will call "failure"?
+* What is the probability of getting, out of $n$ experiments, $x$ successes (or failures)?
+* What is the most likely number of successes (or failures), $x$, if we do $n$ experiments?
+* How likely is the number of successes (or failures) to be between $min$ and $max$, if we do $n$ experiments?
+* Is the probability of success really constant?
+* Are the experiments really independent?
+* Is the probability really $p$?
+* If we expected $p$ to be $want$ probability, and in $n$ experiments, we actually observed $got$ probability of success, how likely is it that $want$ is actually the correct probability?
+* We can never be 100% sure we are right, but if we want to be some amount sure, say "a"
+
+This directly  probability of getting state two on any observation is then, $q = 1 - p$.
+
+
+If $n$ observations of this system are made, it is obvious that on average of $p * n$ of them would be expected to be state one. However, this is only the average. There could actually be any number of state one observations between $0$ and $n$, although the further away this actual number is from the expected average of $p * n$, the less likely it is to happen.
+
+
+
